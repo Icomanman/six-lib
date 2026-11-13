@@ -1,0 +1,6 @@
+
+/tmp
+/venv
+/.github
+
+__pycache__

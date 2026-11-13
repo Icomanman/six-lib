@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "six-lib"
+authors = [
+    { name = "fred barabs", email = "fred_barabs@yahoo.com" }
+]
+version = "0.0.1"
+description = "SixLib Manim animation library to support math animations and presentations."
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+  "manim"
+]

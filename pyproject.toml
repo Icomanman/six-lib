@@ -3,7 +3,7 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "six-lib"
+name = "sixlib"
 authors = [
     { name = "fred barabs", email = "fred_barabs@yahoo.com" }
 ]
@@ -14,3 +14,9 @@ requires-python = ">=3.9"
 dependencies = [
   "manim"
 ]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]

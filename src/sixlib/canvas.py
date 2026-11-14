@@ -1,7 +1,10 @@
-from manim import UP, DOWN, LEFT, Circle, Scene, Text, Write, Create, FadeIn
+from manim import Axes, Scene, Text
+from manim import UP, DOWN, LEFT, Write, Create, FadeIn
+
 from typing import Dict
 
-from sixlib.config import get_colours
+from config import get_colours
+from helpers.getters import get_weights
 
 
 class Canvas(Scene):
@@ -12,19 +15,20 @@ class Canvas(Scene):
         TEXT = colours["text"]
         ACCENT = colours["accent"]
         HIGHLIGHT = colours["highlight"]
-
         self.camera.background_color = BACKGROUND
 
-        title = Text("A first scene", color=TEXT).to_edge(UP)
-        circle = Circle(color=ACCENT, fill_color=ACCENT, fill_opacity=0.2)
-        label = Text("An object", color=TEXT).next_to(circle, DOWN)
+        # ****************************************
+        data_src: Dict[str, float] = get_weights()
+
+        # ****************************************
+
+        title: Text = Text("Weight History", color=TEXT).to_edge(UP)
+        axes: Axes = Axes(
+            x_range=[0, 50],
+            y_range=[0, 50],
+        )
 
         # play() both shows the objects and animates them into view.
         self.play(Write(title))
-        self.play(Create(circle), FadeIn(label))
-        self.play(
-            circle.animate.shift(LEFT * 2).set_color(HIGHLIGHT),
-            label.animate.next_to(circle, DOWN),
-            run_time=1.5,
-        )
+        self.play(Create(axes))
         self.wait()

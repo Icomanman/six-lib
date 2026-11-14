@@ -5,10 +5,28 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Canvas",
+      "name": "Manim: Canvas",
       "type": "debugpy",
       "request": "launch",
-      "program": "${workspaceFolder}/src/sixlib/canvas.py",
+      "module": "manim",
+      "args": [
+        "render",
+        "-pql",
+        "${workspaceFolder}/src/sixlib/canvas.py",
+        "Canvas"
+      ],
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src/sixlib"
+      },
+      "console": "integratedTerminal",
+      "justMyCode": true
+    },
+    {
+      "name": "helpers",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/sixlib/helpers/getters.py",
       "console": "integratedTerminal"
     }
   ]

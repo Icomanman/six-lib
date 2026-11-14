@@ -10,7 +10,10 @@ _DATA_DIR: str = "tmp/data"
 
 def get_weights() -> Dict[str, float]:
     src_file: str = "xiaomi_weights.json"
-    file_path: Path = Path(f"{_DATA_DIR}/{src_file}")
+    file_path: Path = Path(
+        Path(__file__).parents[3] / f"{_DATA_DIR}/{src_file}"
+    )
+    print(file_path)
     src: TextIOWrapper = open(file=file_path)
     data: Dict[float] = {
         extract_date(k["date"]): k["weight"] for k in json.load(src)["records"]
@@ -24,3 +27,6 @@ def extract_date(utc_date: str) -> str:
 
 
 __all__ = ["get_weights"]
+
+if __name__ == "__main__":
+    get_weights()

@@ -13,6 +13,8 @@
         "render",
         "-pql",
         "-s",
+        "--fps",
+        "25",
         "${workspaceFolder}/src/sixlib/canvas.py",
         "Canvas"
       ],

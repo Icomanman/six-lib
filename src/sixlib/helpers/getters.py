@@ -8,7 +8,7 @@ from typing import Dict
 _DATA_DIR: str = "tmp/data"
 
 
-def get_weights() -> Dict[str, float]:
+def get_weights(user: str = "MicoDa") -> Dict[str, float]:
     src_file: str = "xiaomi_weights.json"
     file_path: Path = Path(
         Path(__file__).parents[3] / f"{_DATA_DIR}/{src_file}"
@@ -17,6 +17,7 @@ def get_weights() -> Dict[str, float]:
     src: TextIOWrapper = open(file=file_path)
     data: Dict[float] = {
         extract_date(k["date"]): k["weight"] for k in json.load(src)["records"]
+        if k["user"] == user
     }
     src.close()
     return data

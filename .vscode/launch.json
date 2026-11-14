@@ -12,6 +12,7 @@
       "args": [
         "render",
         "-pql",
+        "-s",
         "${workspaceFolder}/src/sixlib/canvas.py",
         "Canvas"
       ],

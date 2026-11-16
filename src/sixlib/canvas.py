@@ -1,10 +1,11 @@
 
 from math import ceil
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from manim import (
     Axes,
     DOWN,
+    RIGHT,
     UP,
     Create,
     Dot,
@@ -18,7 +19,7 @@ from manim import (
 )
 
 from config import get_colours
-from helpers.getters import get_weights
+from helpers.getters import daily_moving_average, get_weights
 
 
 class Canvas(MovingCameraScene):
@@ -34,10 +35,21 @@ class Canvas(MovingCameraScene):
         data_src: Dict[str, float] = get_weights(sort_by_date=True)
         if not data_src:
             raise ValueError("Cannot animate an empty time series.")
+        average_src: Dict[str, float] = daily_moving_average(data_src)
 
         dates: List[str] = list(data_src)
         values: List[float] = [data_src[day] for day in dates]
         x_values: List[int] = list(range(len(dates)))
+        date_to_x: Dict[str, int] = {
+            day: index for index, day in enumerate(dates)
+        }
+        average_dates: List[str] = list(average_src)
+        average_x_values: List[int] = [
+            date_to_x[day] for day in average_dates
+        ]
+        average_values: List[float] = [
+            average_src[day] for day in average_dates
+        ]
 
         value_min = min(values)
         value_max = max(values)
@@ -63,6 +75,21 @@ class Canvas(MovingCameraScene):
             add_vertex_dots=False,
         )
         line = graph["line_graph"]
+        average_line: Optional[Mobject] = None
+        if len(average_values) == 1:
+            average_line = Dot(
+                axes.c2p(average_x_values[0], average_values[0]),
+                radius=0.07,
+                color=HIGHLIGHT,
+            )
+        elif average_values:
+            average_graph = axes.plot_line_graph(
+                x_values=average_x_values,
+                y_values=average_values,
+                line_color=HIGHLIGHT,
+                add_vertex_dots=False,
+            )
+            average_line = average_graph["line_graph"]
         data_points = [
             axes.c2p(x_value, value) for x_value, value in zip(x_values, values)
         ]
@@ -89,6 +116,11 @@ class Canvas(MovingCameraScene):
             )
             for index in date_indices
         ]
+        average_label: Optional[Text] = None
+        if average_values:
+            average_label = Text(
+                "7-day moving average", color=HIGHLIGHT, font_size=16
+            ).next_to(axes, UP, buff=0.15).align_to(axes, RIGHT)
         camera_y = (y_min + y_max) / 2
         start_position = axes.c2p(x_values[0], camera_y)
         end_position = axes.c2p(x_values[-1], camera_y)
@@ -105,12 +137,16 @@ class Canvas(MovingCameraScene):
         )
         self.play(Create(axes))
         self.add(*date_labels)
+        if average_label is not None:
+            self.add(average_label)
         self.add(marker)
         marker_animation = UpdateFromAlphaFunc(marker, follow_data_points)
+        plot_animations = [marker_animation, Create(line)]
+        if average_line is not None:
+            plot_animations.append(Create(average_line))
+        plot_animations.append(self.camera.frame.animate.move_to(end_position))
         self.play(
-            marker_animation,
-            Create(line),
-            self.camera.frame.animate.move_to(end_position),
+            *plot_animations,
             run_time=min(8, max(2, len(dates) * 0.1)),
             rate_func=linear,
         )

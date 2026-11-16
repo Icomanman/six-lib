@@ -38,6 +38,16 @@ def daily_moving_average(sorted_data: Dict[str, float], decimals: int = 2) -> Di
     return data
 
 
+def weekly_average(sorted_data: Dict[str, float], decimals: int = 2) -> Dict[str, float]:
+    """
+    Weekly average; (aggregate)
+    """
+    data: Dict[str, float] = {}
+    partial: int = len(sorted_data.items()) % 7
+    weeks: int = (len(sorted_data.items()) - partial) / 7
+    return data
+
+
 def _extract_date(utc_date: str) -> str:
     return str(utc_date.split("T")[0])
 
@@ -50,8 +60,9 @@ def _sort_data(src_data: Dict[str, float]) -> Dict[str, float]:
     return dict(sorted_data)
 
 
-__all__ = ["get_weights", "weekly_moving_average"]
+__all__ = ["get_weights", "daily_moving_average"]
 
 if __name__ == "__main__":
     src_data: Dict[str, float] = get_weights(sort_by_date=True)
-    daily_moving_average(sorted_data=src_data)
+    # daily_moving_average(sorted_data=src_data)
+    weekly_average(sorted_data=src_data)

@@ -42,9 +42,18 @@ def weekly_average(sorted_data: Dict[str, float], decimals: int = 2) -> Dict[str
     """
     Weekly average; (aggregate)
     """
+    day_offset: int = 3
     data: Dict[str, float] = {}
-    partial: int = len(sorted_data.items()) % 7
-    weeks: int = (len(sorted_data.items()) - partial) / 7
+
+    _sorted: List[tuple] = list(sorted_data.items())
+    data_points: int = len(_sorted)
+    partial: int = data_points % 7
+    weeks: int = int((data_points - partial) / 7)
+    for i in range(0, weeks):
+        _step: int = i * 7
+        week_set: List[tuple] = _sorted[_step: _step + 7]
+        date_key: str = _sorted[_step + day_offset][0]
+        data[date_key] = sum(value for _, value in week_set) / 7
     return data
 
 

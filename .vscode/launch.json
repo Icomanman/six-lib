@@ -11,10 +11,10 @@
       "module": "manim",
       "args": [
         "render",
-        "-pql",
-        "-s",
+        "-pqh",
         "--fps",
         "25",
+        "-s",
         "${workspaceFolder}/src/sixlib/canvas.py",
         "Canvas"
       ],

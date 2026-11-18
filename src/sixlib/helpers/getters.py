@@ -69,7 +69,7 @@ def _sort_data(src_data: Dict[str, float]) -> Dict[str, float]:
     return dict(sorted_data)
 
 
-__all__ = ["get_weights", "daily_moving_average"]
+__all__ = ["get_weights", "daily_moving_average", "weekly_average"]
 
 if __name__ == "__main__":
     src_data: Dict[str, float] = get_weights(sort_by_date=True)

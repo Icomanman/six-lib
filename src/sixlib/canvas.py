@@ -19,7 +19,7 @@ from manim import (
 )
 
 from config import get_colours
-from helpers.getters import daily_moving_average, get_weights
+from helpers.getters import daily_moving_average, get_weights, weekly_average
 
 
 class Canvas(MovingCameraScene):
@@ -36,6 +36,7 @@ class Canvas(MovingCameraScene):
         if not data_src:
             raise ValueError("Cannot animate an empty time series.")
         average_src: Dict[str, float] = daily_moving_average(data_src)
+        weekly_average_src: Dict[str, float] = weekly_average(data_src)
 
         dates: List[str] = list(data_src)
         values: List[float] = [data_src[day] for day in dates]
@@ -43,12 +44,27 @@ class Canvas(MovingCameraScene):
         date_to_x: Dict[str, int] = {
             day: index for index, day in enumerate(dates)
         }
+
         average_dates: List[str] = list(average_src)
         average_x_values: List[int] = [
             date_to_x[day] for day in average_dates
         ]
         average_values: List[float] = [
             average_src[day] for day in average_dates
+        ]
+
+        # line offset
+        _offset: int = 1
+        average_values_offset: List[float] = [
+            average_src[day] - _offset for day in average_dates
+        ]
+
+        weekly_dates: List[str] = list(weekly_average_src)
+        weekly_x_values: List[int] = [
+            date_to_x[day] for day in weekly_dates
+        ]
+        weekly_values: List[float] = [
+            weekly_average_src[day] - _offset for day in weekly_dates
         ]
 
         value_min = min(values)
@@ -61,12 +77,14 @@ class Canvas(MovingCameraScene):
         date_step = max(1, ceil((len(dates) - 1) / 4))
         # *********************************************************
 
+        _new_goal: int = 62
         title: Text = Text("Weight History", color=TEXT).to_edge(UP)
         axes: Axes = Axes(
             x_range=[0, max(1, len(dates) - 1), date_step],
-            y_range=[y_min, y_max, (y_max - y_min) / 5],
+            # y_range=[y_min, y_max, (y_max - y_min) / 5],
+            y_range=[_new_goal, 70],
             x_length=26,
-            y_length=5,
+            y_length=8,
         )
         graph = axes.plot_line_graph(
             x_values=x_values,
@@ -90,6 +108,22 @@ class Canvas(MovingCameraScene):
                 add_vertex_dots=False,
             )
             average_line = average_graph["line_graph"]
+
+        weekly_graph = axes.plot_line_graph(
+            x_values=weekly_x_values,
+            y_values=weekly_values,
+            line_color=TEXT,
+            add_vertex_dots=False,
+        )
+        weekly_line = weekly_graph["line_graph"]
+        average_graph = axes.plot_line_graph(
+            x_values=average_x_values,
+            y_values=average_values_offset,
+            line_color=HIGHLIGHT,
+            add_vertex_dots=False,
+        )
+        average_line_offset = average_graph["line_graph"]
+
         data_points = [
             axes.c2p(x_value, value) for x_value, value in zip(x_values, values)
         ]
@@ -112,14 +146,15 @@ class Canvas(MovingCameraScene):
             date_indices.append(len(dates) - 1)
         date_labels = [
             Text(dates[index], color=TEXT, font_size=16).next_to(
-                axes.c2p(index, y_min), DOWN, buff=0.15
+                # axes.c2p(index, y_min), DOWN, buff=0.15
+                axes.c2p(index, _new_goal), DOWN, buff=0.15
             )
             for index in date_indices
         ]
         average_label: Optional[Text] = None
         if average_values:
             average_label = Text(
-                "7-day moving average", color=HIGHLIGHT, font_size=16
+                "7-day moving average", color=HIGHLIGHT, font_size=24
             ).next_to(axes, UP, buff=0.15).align_to(axes, RIGHT)
         camera_y = (y_min + y_max) / 2
         start_position = axes.c2p(x_values[0], camera_y)
@@ -144,6 +179,14 @@ class Canvas(MovingCameraScene):
         plot_animations = [marker_animation, Create(line)]
         if average_line is not None:
             plot_animations.append(Create(average_line))
+
+        # plot_animations.append(Create(weekly_line))
+        weekly_label = Text(
+            "weekly average", color=TEXT, font_size=24
+        ).next_to(axes, UP, buff=-0.25).align_to(axes, RIGHT)
+        # self.add(weekly_label)
+        # plot_animations.append(Create(average_line_offset))
+
         plot_animations.append(self.camera.frame.animate.move_to(end_position))
         self.play(
             *plot_animations,
@@ -154,7 +197,7 @@ class Canvas(MovingCameraScene):
             self.camera.frame.animate.move_to(axes.get_center()).scale(
                 full_chart_width / camera_width
             ),
-            run_time=5,
+            run_time=3,
             run_func=smoothstep
         )
-        self.wait(5)
+        self.wait(10)

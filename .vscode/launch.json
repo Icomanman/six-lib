@@ -14,7 +14,7 @@
         "-pqh",
         "--fps",
         "25",
-        "-s",
+        // "-s",
         "${workspaceFolder}/src/sixlib/canvas.py",
         "Canvas"
       ],

@@ -4,11 +4,14 @@ from typing import Dict, List, Optional
 
 from manim import (
     Axes,
+    DEGREES,
     DOWN,
     RIGHT,
+    LEFT,
     UP,
     Create,
     Dot,
+    Line,
     Mobject,
     MovingCameraScene,
     Text,
@@ -75,6 +78,12 @@ class Canvas(MovingCameraScene):
         y_min = value_min - padding
         y_max = value_max + padding
         date_step = max(1, ceil((len(dates) - 1) / 4))
+        month_indices = [0]
+        month_indices.extend(
+            index
+            for index in range(1, len(dates))
+            if dates[index][:7] != dates[index - 1][:7]
+        )
         # *********************************************************
 
         _new_goal: int = 62
@@ -85,6 +94,25 @@ class Canvas(MovingCameraScene):
             y_range=[_new_goal, 70],
             x_length=26,
             y_length=8,
+            x_axis_config={
+                "include_ticks": False,
+                "include_numbers": False,
+                "tip_width": 0.20,
+                "tip_height": 0.30,
+            },
+            y_axis_config={
+                "include_numbers": False,
+                "tip_width": 0.20,
+                "tip_height": 0.30,
+            },
+        )
+        x_axis_label = Text("Date", color=TEXT, font_size=24).next_to(
+            axes.x_axis, DOWN, buff=0.75
+        )
+        y_axis_label = Text("Weight (kg)", color=TEXT, font_size=24).rotate(
+            90 * DEGREES
+        ).next_to(
+            axes.y_axis, LEFT, buff=0.5
         )
         graph = axes.plot_line_graph(
             x_values=x_values,
@@ -141,15 +169,26 @@ class Canvas(MovingCameraScene):
             end = data_points[segment_index + 1]
             mobject.move_to(start + segment_alpha * (end - start))
 
-        date_indices = list(range(0, len(dates), date_step))
-        if date_indices[-1] != len(dates) - 1:
-            date_indices.append(len(dates) - 1)
-        date_labels = [
-            Text(dates[index], color=TEXT, font_size=16).next_to(
-                # axes.c2p(index, y_min), DOWN, buff=0.15
-                axes.c2p(index, _new_goal), DOWN, buff=0.15
+        month_ticks = [
+            Line(
+                axes.c2p(index, _new_goal) + DOWN * 0.08,
+                axes.c2p(index, _new_goal) + UP * 0.08,
+                color=TEXT,
             )
-            for index in date_indices
+            for index in month_indices
+        ]
+        y_tick_values = list(range(_new_goal, 71))
+        y_labels = [
+            Text(str(value - 60), color=TEXT, font_size=20).next_to(
+                axes.c2p(0, value), LEFT, buff=0.35
+            )
+            for value in y_tick_values
+        ]
+        date_labels = [
+            Text(dates[index][:7], color=TEXT, font_size=20).next_to(
+                axes.c2p(index, _new_goal), DOWN, buff=0.35
+            )
+            for index in month_indices
         ]
         average_label: Optional[Text] = None
         if average_values:
@@ -171,6 +210,9 @@ class Canvas(MovingCameraScene):
             # rate_func=smoothstep
         )
         self.play(Create(axes))
+        self.add(x_axis_label, y_axis_label)
+        self.add(*month_ticks)
+        self.add(*y_labels)
         self.add(*date_labels)
         if average_label is not None:
             self.add(average_label)
